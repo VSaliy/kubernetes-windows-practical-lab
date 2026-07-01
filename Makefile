@@ -6,7 +6,18 @@ check: validate-yaml validate-manifests check-shell check-powershell
 
 validate-yaml:
 	python3 -m pip install --quiet PyYAML
-	python3 -c "from pathlib import Path; import yaml; files = sorted(p for p in Path('.').rglob('*') if p.suffix in {'.yaml', '.yml'} and '.git/' not in p.as_posix()); [list(yaml.safe_load_all(p.open('r', encoding='utf-8'))) or print(f'YAML OK: {p}') for p in files]"
+	python3 <<'PYCODE'
+from pathlib import Path
+import yaml
+
+for path in sorted(
+    p for p in Path('.').rglob('*')
+    if p.suffix in {'.yaml', '.yml'} and '.git/' not in p.as_posix()
+):
+    with path.open('r', encoding='utf-8') as handle:
+        list(yaml.safe_load_all(handle))
+    print(f'YAML OK: {path}')
+PYCODE
 
 validate-manifests:
 	@command -v kubectl >/dev/null 2>&1 || { echo 'kubectl is required'; exit 1; }
