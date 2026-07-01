@@ -1,0 +1,8 @@
+flowchart LR
+    Manifest[Manifest] --> Scheduler[Scheduler]
+    Scheduler --> Node[Target Node]
+    Node --> Kubelet[Kubelet]
+    Kubelet --> Runtime[containerd]
+    Runtime --> CNI[CNI wiring]
+    CNI --> Running[Running Pod]
+    Running --> Probe[Health Probes]

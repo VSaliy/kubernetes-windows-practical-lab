@@ -1,0 +1,12 @@
+sequenceDiagram
+    participant Client as Client Pod
+    participant DNS as CoreDNS
+    participant VIP as Service VIP
+    participant Proxy as kube-proxy / dataplane
+    participant Backend as Backend Pod
+    Client->>DNS: Resolve service name
+    DNS-->>Client: ClusterIP
+    Client->>VIP: Connect
+    VIP->>Proxy: Route decision
+    Proxy->>Backend: Forward traffic
+    Backend-->>Client: Response

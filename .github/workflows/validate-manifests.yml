@@ -1,0 +1,44 @@
+name: Validate Manifests
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4.2.2
+
+      - name: Validate YAML syntax
+        run: |
+          set -euo pipefail
+          python3 -m pip install --quiet PyYAML
+          python3 <<'PY'
+          from pathlib import Path
+          import yaml
+
+          for path in sorted(p for p in Path('.').rglob('*') if p.suffix in {'.yaml', '.yml'} and '.git/' not in p.as_posix()):
+              with path.open('r', encoding='utf-8') as handle:
+                  list(yaml.safe_load_all(handle))
+              print(f'YAML OK: {path}')
+          PY
+
+      - name: Install kubectl if needed
+        run: |
+          set -euo pipefail
+          if ! command -v kubectl >/dev/null 2>&1; then
+            curl -fsSL -o kubectl https://dl.k8s.io/release/v1.36.2/bin/linux/amd64/kubectl
+            chmod +x kubectl
+            sudo mv kubectl /usr/local/bin/kubectl
+          fi
+          kubectl version --client
+
+      - name: Client-side dry-run validation
+        run: |
+          set -euo pipefail
+          while IFS= read -r file; do
+            echo "kubectl dry-run: ${file}"
+            kubectl apply --dry-run=client --validate=false -f "${file}" >/dev/null
+          done < <(find manifests final-project/manifests -type f \( -name '*.yaml' -o -name '*.yml' \) | sort)

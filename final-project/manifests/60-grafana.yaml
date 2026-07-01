@@ -1,0 +1,9 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: grafana-placeholder
+  namespace: hybrid-lab
+data:
+  README: |
+    Replace this placeholder with Grafana deployment and dashboards.
+    Compare Linux and Windows behavior side by side.

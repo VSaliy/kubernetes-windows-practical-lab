@@ -1,0 +1,9 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: prometheus-placeholder
+  namespace: hybrid-lab
+data:
+  README: |
+    Replace this placeholder with Prometheus resources.
+    Keep Linux and Windows scrape paths explicit.

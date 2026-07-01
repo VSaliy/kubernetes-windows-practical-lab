@@ -1,0 +1,17 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: windows-diagnostics
+  labels:
+    app: windows-diagnostics
+spec:
+  restartPolicy: Always
+  nodeSelector:
+    kubernetes.io/os: windows
+  containers:
+    - name: powershell
+      image: mcr.microsoft.com/powershell:lts-windowsservercore-ltsc2022
+      command:
+        - pwsh
+        - -Command
+        - Start-Sleep -Seconds 3600
