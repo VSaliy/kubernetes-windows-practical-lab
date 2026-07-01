@@ -1,0 +1,21 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: smb-shared-content
+  namespace: hybrid-lab
+spec:
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: 20Gi
+  storageClassName: smb-placeholder
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: smb-storage-notes
+  namespace: hybrid-lab
+data:
+  README: |
+    Replace the placeholder storage class with the CSI driver and credentials approved for your environment.

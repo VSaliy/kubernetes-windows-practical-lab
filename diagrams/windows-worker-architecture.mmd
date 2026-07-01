@@ -1,0 +1,6 @@
+flowchart TB
+    API[Kubernetes API Server] --> Kubelet[Windows kubelet]
+    Kubelet --> Runtime[containerd on Windows]
+    Runtime --> HNS[Host Networking Service]
+    Runtime --> Images[Windows base images\nLTSC 2022 aligned]
+    Kubelet --> Proxy[kube-proxy]

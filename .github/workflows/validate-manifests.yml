@@ -1,0 +1,52 @@
+name: Validate Manifests
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4.2.2
+
+      - name: Validate YAML syntax
+        run: |
+          set -euo pipefail
+          python3 -m pip install --quiet PyYAML
+          python3 <<'PYCODE'
+          from pathlib import Path
+          import yaml
+
+          for path in sorted(p for p in Path('.').rglob('*') if p.suffix in {'.yaml', '.yml'} and '.git/' not in p.as_posix()):
+              with path.open('r', encoding='utf-8') as handle:
+                  list(yaml.safe_load_all(handle))
+              print(f'YAML OK: {path}')
+          PYCODE
+
+      - name: Install kubectl if needed
+        run: |
+          set -euo pipefail
+          if ! command -v kubectl >/dev/null 2>&1; then
+            version='v1.36.2'
+            curl -fsSLO "https://dl.k8s.io/release/${version}/bin/linux/amd64/kubectl"
+            curl -fsSLO "https://dl.k8s.io/release/${version}/bin/linux/amd64/kubectl.sha256"
+            echo "$(cat kubectl.sha256)  kubectl" | sha256sum -c -
+            rm -f kubectl.sha256
+            chmod +x kubectl
+            sudo mv kubectl /usr/local/bin/kubectl
+          fi
+          kubectl version --client
+
+      - name: Validate Kubernetes manifests (offline schema)
+        run: |
+          set -euo pipefail
+          curl -fsSLO https://github.com/yannh/kubeconform/releases/latest/download/kubeconform-linux-amd64.tar.gz
+          tar -xzf kubeconform-linux-amd64.tar.gz kubeconform
+          sudo mv kubeconform /usr/local/bin/kubeconform
+          rm -f kubeconform-linux-amd64.tar.gz
+          find manifests final-project/manifests -type f \( -name '*.yaml' -o -name '*.yml' \) | sort | xargs -r kubeconform -strict -ignore-missing-schemas -summary

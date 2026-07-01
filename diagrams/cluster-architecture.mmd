@@ -1,0 +1,9 @@
+flowchart TB
+    Host[Windows 11 Pro Host\nHyper-V + kubectl + Helm]
+    Host --> Switch[Lab vSwitch]
+    Switch --> CP[Ubuntu Control Plane\nkubeadm + etcd + containerd]
+    Switch --> LW[Ubuntu Linux Worker\ncontainerd]
+    Switch --> WW[Windows Server 2022 Worker\ncontainerd]
+    CP --> API[Kubernetes API]
+    API --> LinuxApps[Linux Workloads]
+    API --> WindowsApps[Windows Workloads]

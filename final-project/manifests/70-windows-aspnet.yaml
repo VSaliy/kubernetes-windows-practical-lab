@@ -1,0 +1,22 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: windows-aspnet
+  namespace: hybrid-lab
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: windows-aspnet
+  template:
+    metadata:
+      labels:
+        app: windows-aspnet
+    spec:
+      nodeSelector:
+        kubernetes.io/os: windows
+      containers:
+        - name: aspnet
+          image: mcr.microsoft.com/dotnet/framework/aspnet:4.8-windowsservercore-ltsc2022
+          ports:
+            - containerPort: 80

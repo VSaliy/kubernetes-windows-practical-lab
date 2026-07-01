@@ -1,0 +1,24 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: windows-background-worker
+  namespace: hybrid-lab
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: windows-background-worker
+  template:
+    metadata:
+      labels:
+        app: windows-background-worker
+    spec:
+      nodeSelector:
+        kubernetes.io/os: windows
+      containers:
+        - name: worker
+          image: mcr.microsoft.com/powershell:lts-windowsservercore-ltsc2022
+          command:
+            - pwsh
+            - -Command
+            - while ($true) { Write-Host 'placeholder worker loop'; Start-Sleep -Seconds 30 }

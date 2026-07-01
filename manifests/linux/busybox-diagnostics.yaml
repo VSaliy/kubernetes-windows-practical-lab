@@ -1,0 +1,17 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: linux-busybox-diagnostics
+  labels:
+    app: linux-busybox-diagnostics
+spec:
+  restartPolicy: Always
+  nodeSelector:
+    kubernetes.io/os: linux
+  containers:
+    - name: busybox
+      image: busybox:1.36
+      command:
+        - /bin/sh
+        - -c
+        - sleep 3600
