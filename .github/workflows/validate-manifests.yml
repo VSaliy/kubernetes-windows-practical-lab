@@ -38,19 +38,11 @@ jobs:
           fi
           kubectl version --client
 
-      - name: Client-side dry-run validation where possible
+      - name: Validate Kubernetes manifests (offline schema)
         run: |
           set -euo pipefail
-          while IFS= read -r file; do
-            echo "kubectl dry-run: ${file}"
-            if kubectl apply --dry-run=client --validate=false -f "${file}" >/dev/null 2>kubectl.err; then
-              echo "kubectl OK: ${file}"
-            elif grep -Eq 'connection refused|failed to download openapi|couldn.t get current server API group list|unable to recognize' kubectl.err; then
-              echo "kubectl skipped (offline discovery limitation): ${file}"
-            else
-              cat kubectl.err
-              rm -f kubectl.err
-              exit 1
-            fi
-          done < <(find manifests final-project/manifests -type f \( -name '*.yaml' -o -name '*.yml' \) | sort)
-          rm -f kubectl.err
+          curl -fsSLO https://github.com/yannh/kubeconform/releases/latest/download/kubeconform-linux-amd64.tar.gz
+          tar -xzf kubeconform-linux-amd64.tar.gz kubeconform
+          sudo mv kubeconform /usr/local/bin/kubeconform
+          rm -f kubeconform-linux-amd64.tar.gz
+          find manifests final-project/manifests -type f \( -name '*.yaml' -o -name '*.yml' \) | sort | xargs -r kubeconform -strict -ignore-missing-schemas -summary
