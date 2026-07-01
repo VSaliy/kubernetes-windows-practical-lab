@@ -32,7 +32,11 @@ jobs:
         run: |
           set -euo pipefail
           if ! command -v kubectl >/dev/null 2>&1; then
-            curl -fsSL -o kubectl https://dl.k8s.io/release/v1.36.2/bin/linux/amd64/kubectl
+            version='v1.36.2'
+            curl -fsSLO "https://dl.k8s.io/release/${version}/bin/linux/amd64/kubectl"
+            curl -fsSLO "https://dl.k8s.io/release/${version}/bin/linux/amd64/kubectl.sha256"
+            echo "$(cat kubectl.sha256)  kubectl" | sha256sum -c -
+            rm -f kubectl.sha256
             chmod +x kubectl
             sudo mv kubectl /usr/local/bin/kubectl
           fi
